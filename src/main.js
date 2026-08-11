@@ -65,4 +65,4 @@ document.querySelector("#search").addEventListener("keydown", e => {
     window.location.href =
       `https://www.google.com/search?q=${encodeURIComponent(e.target.value)}`;
   }
-});
+});                                                                       
