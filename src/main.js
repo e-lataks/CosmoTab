@@ -16,7 +16,7 @@ document.querySelector("#app").innerHTML = `
 
   <button id="changeSpace">Change Space</button>
 
-  <div id="media"></div>
+  <div id="media">Loading...</div>
 `;
 
 function updateTime() {
@@ -39,7 +39,6 @@ function updateTime() {
 updateTime();
 setInterval(updateTime, 1000);
 
-
 navigator.geolocation.getCurrentPosition(position => {
   const lat = position.coords.latitude;
   const lon = position.coords.longitude;
@@ -54,17 +53,15 @@ navigator.geolocation.getCurrentPosition(position => {
     });
 });
 
-
 function loadSpace() {
   const start = new Date(1995, 5, 16);
   const end = new Date();
 
-  const randomTime =
-    start.getTime() + Math.random() * (end.getTime() - start.getTime());
+  const randomDate = new Date(
+    start.getTime() + Math.random() * (end.getTime() - start.getTime())
+  ).toISOString().split("T")[0];
 
-  const randomDate = new Date(randomTime)
-    .toISOString()
-    .split("T")[0];
+  document.querySelector("#media").innerHTML = "Loading...";
 
   fetch(
     `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}&date=${randomDate}`
@@ -73,23 +70,19 @@ function loadSpace() {
       if (!response.ok) {
         throw new Error("NASA API error");
       }
-
       return response.json();
     })
     .then(data => {
-      if (data.media_type !== "image" && data.media_type !== "video") {
+      if (data.media_type === "image") {
+        document.querySelector("#media").innerHTML =
+          `<img src="${data.url}" alt="${data.title}">`;
+      } else {
         loadSpace();
-        return;
       }
-
-      const media = data.media_type === "image"
-        ? `<img src="${data.url}">`
-        : `<video src="${data.url}" autoplay muted loop></video>`;
-
-      document.querySelector("#media").innerHTML = media;
     })
     .catch(() => {
-      loadSpace();
+      document.querySelector("#media").innerHTML = "Loading space...";
+      setTimeout(loadSpace, 1000);
     });
 }
 
